@@ -1,10 +1,43 @@
+/* Hide all steps by default: */
+.tab {
+  display: none;
+}
+
+.step.active {
+  opacity: 1;
+}
+
+/* Mark the steps that are finished and valid: */
+.step.finish {
+  background-color: #d95700;
+}
+
+/* Make circles that indicate the steps of the form: */
+.step {
+  height: 15px;
+  width: 15px;
+  margin: 0 2px;
+  background-color: #bbbbbb;
+  border: none;  
+  border-radius: 50%;
+  display: inline-block;
+  opacity: 0.5;
+}
+
+.footer-copyright{
+  background-color: #D3D3D3;
+}
 .jumbotronHeaderImg{
-  background-image: url(/images/120821-F-QX786-903.JPG);
-  background-size: cover;
+  /*background-image: url(/images/120821-F-QX786-903.JPG);
+  background-image: url(/images/cover3.png);
+
+  background-size: cover;*/
+  border-top: 3px solid #dbdbdb; 
 }
 .jumbotron {
     background-color: #ffffff !important;
-    border-top: 3px solid #dbdbdb; }
+    
+  }
   
   /*!
    * Bootstrap v4.1.1 (https://getbootstrap.com/)
