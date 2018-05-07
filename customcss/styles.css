@@ -1,3 +1,7 @@
+.jumbotronHeaderImg{
+  background-image: url(/images/120821-F-QX786-903.JPG);
+  background-size: cover;
+}
 .jumbotron {
     background-color: #ffffff !important;
     border-top: 3px solid #dbdbdb; }
