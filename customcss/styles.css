@@ -28,10 +28,10 @@
   background-color: #D3D3D3;
 }
 .jumbotronHeaderImg{
-  /*background-image: url(/images/120821-F-QX786-903.JPG);
-  background-image: url(/images/cover3.png);
+  /*background-image: url(/images/120821-F-QX786-903.JPG);*/
+  background-image: url(/images/flighter2.jpg);
 
-  background-size: cover;*/
+  background-size: cover;
   border-top: 3px solid #dbdbdb; 
 }
 .jumbotron {
