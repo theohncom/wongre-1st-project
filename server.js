@@ -59,6 +59,11 @@ app.get('/',function(req,res){
     res.sendFile(pathView + "index.html");
 })
 
+app.get('/backup',function(req,res){
+  //res.sendFile(pathView+'index.html');
+  res.sendFile(pathView + "index_backup.html");
+})
+
 app.get('/certificate',function(req,res){
     //res.sendFile(pathView+'index.html');
     res.sendFile(pathView + "certificate.html");
