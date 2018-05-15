@@ -51,7 +51,7 @@
                            <small>Smart flight insurance powered by blockchain technology.</small>
                            
                     </div>
-                    <div class="jumbotron pt-3">
+                    <div class="jumbotron pt-3" id="jumbotronForm">
                         <form>
                             <div class="tab">
                                 <h2 class="display-5">Customer and Flight Information</h1>
@@ -66,24 +66,25 @@
                                         </div>
                                         <div class="form-group col-sm">
                                             <label for="inputEmail">Email</label>
-                                            <input type="email" class="form-control" id="inputEmail" placeholder="Email" required>
+                                            <input type="email" class="form-control" id="inputEmail" placeholder="Email" data-error="That email address is invalid" required>
+                                            
                                         </div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group col-sm-2">
-                                            <label for="ddate">Date of departure</label>
-                                            <input type="date" id="ddate" required>
+                                            <label for="d_date">Date of departure</label>
+                                            <input type="date" id="d_date" required>
                                         </div>
                                         <div class="form-group col-sm-5">
                                             <label for="inputFromAirport">From</label>
                                             <select id="inputFromAirport" class="form-control" required>
-                                                <option disabled selected hidden>Choose...</option>
+                                                <option disabled selected hidden value="">Choose...</option>
                                             </select>
                                         </div>
                                         <div class="form-group col-sm-5">
                                             <label for="inputToAirport">To</label>
                                             <select id="inputToAirport" class="form-control" required>
-                                                <option disabled selected hidden>Choose...</option>
+                                                <option disabled selected hidden value="">Choose...</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -113,7 +114,7 @@
                                             <legend class="col-form-label col-sm-2 pt-0">Policy</legend>
                                             <div class="col-sm-10">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="policyRadios" id="policyRadios1" value="polocy2" checked>
+                                                    <input class="form-check-input" type="radio" name="policyRadios" id="policyRadios1" value="policy1" checked>
                                                     <label class="form-check-label" for="policyRadios1">
                                                         Delay in 15-29 minutes: Pay 500 Bath Recieve 2000 Bath.
                                                     </label>
@@ -161,7 +162,7 @@
                                                                 <!-- Expiry date-->
                                                                 <label class="control-label" for="expiry_month">Card Expiry Date</label>
                                                                 <select class="form-control" name="expiry_month" id="expiry_month">
-                                                                    <option disabled selected hidden>Choose..</option>
+                                                                    <option disabled selected hidden value="">Choose..</option>
                                                                     <option value="01">Jan (01)</option>
                                                                     <option value="02">Feb (02)</option>
                                                                     <option value="03">Mar (03)</option>
@@ -180,7 +181,7 @@
                                                                 <!-- Expiry year-->
                                                                 <label class="control-label" for="expiry_month">Card Expiry year</label>
                                                                 <select class="form-control" name="expiry_year">
-                                                                    <option disabled selected hidden>Choose..</option>    
+                                                                    <option disabled selected hidden value="">Choose..</option>    
                                                                     <option value="18">2018</option>
                                                                     <option value="19">2019</option>
                                                                     <option value="20">2020</option>
@@ -220,7 +221,11 @@
                         </form> 
                           
                     </div>
+                <div class="jumbotron" id="jumbotronResult" style="display: none">
+                    <div id="certResult"></div>   
+                    <img id="loaderResult" src="https://loading.io/spinners/double-ring/lg.double-ring-spinner.gif">
 
+                </div>
 
             <!--Footer-->
             <footer class="page-footer font-small blue pt-4 mt-4">
@@ -301,7 +306,7 @@
                 // This function will figure out which tab to display
                 var x = document.getElementsByClassName("tab");
                 // Exit the function if any field in the current tab is invalid:
-                if (n == 1 && !validateForm()) return false;
+                if (n <= 1 && !validateForm()) return false;
                 // Hide the current tab:
                 x[currentTab].style.display = "none";
                 // Increase or decrease the current tab by 1:
@@ -309,7 +314,8 @@
                 // if you have reached the end of the form...
                 if (currentTab >= x.length) {
                     // ... the form gets submitted:
-                    document.getElementById("regForm").submit();
+                    submitForm();
+                    //document.getElementById("regForm").submit();
                     return false;
                 }
                 // Otherwise, display the correct tab:
@@ -329,11 +335,24 @@
                     y[i].className += " invalid";
                     // and set the current valid status to false
                     valid = false;
+                    
+                    }
+                    if ((y[i].type == "email")&&(y[i].value != "")){
+                        //alert((y[i].value));
+                        if(!ValidateEmail(y[i].value)){
+                            //alert((y[i].value));
+                            y[i].className += " invalid";
+                            // and set the current valid status to false
+                            valid = false;
+                        }
                     }
                 }
                 // If the valid status is true, mark the step as finished and valid:
                 if (valid) {
                     document.getElementsByClassName("step")[currentTab].className += " finish";
+                }
+                else{
+                    x[currentTab].className +=' was-validated';
                 }
                 return valid; // return the valid status
                 }
@@ -350,6 +369,13 @@
 
 
                 function searchflights(){
+                    //$("#d_date").val();
+                    var strPost = 'fromAirport='+$("#inputFromAirport").val();
+                    strPost += '&toAirport='+$("#inputToAirport").val();
+                    strPost += '&d_year='+$("#d_date").val().split('-')[0];
+                    strPost += '&d_month='+$("#d_date").val().split('-')[1];
+                    strPost += '&d_day='+$("#d_date").val().split('-')[2];
+                    console.log(strPost);
                     var xhttp = new XMLHttpRequest();
                     xhttp.onreadystatechange = function() {
                         if (this.readyState == 4 && this.status == 200) {
@@ -361,38 +387,80 @@
                     };
                     xhttp.open("POST", "api/searchflight", true);
                     xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                    xhttp.send();
+                    //xhttp.send("fname=Henry&lname=Ford");
+                    xhttp.send(strPost);
                 }
 
                 function list_flights(json_flights){
                     var text ='';
                    for(x in json_flights){
-                       console.log(json_flights.x);
+                       //console.log(json_flights[x]);
                        // start one flight list
-                        text ='<fieldset class="form-group">';
+                        text +='<fieldset class="form-group">';
                         text +='<div class="row">';
                         text +='<legend class="col-form-label col-sm-12 pt-0">';
-                        text += 'Departure: '+json_flights.x["d_time"]+' '+json_flights.x["d_date"]+' Arrival: '+json_flights.x["a_time"]+' '+json_flights.x["a_date"];
+                        text += 'Departure: '+json_flights[x]["d_time"]+' '+json_flights[x]["d_date"]+' Arrival: '+json_flights[x]["a_time"]+' '+json_flights[x]["a_date"];
                         text +='</legend></div>';
                         text +='<div class="row"><div class="form-group col-sm-1"></div>';
-
+                        text +='<div class="form-group col-sm"><div class="form-check form-check-inline">';
                         //loop insert all flights
-                        for(i in json_flights.x){
-                            text +='<div class="form-group col-sm"><div class="form-check form-check-inline">';
-                            text +='<label class="form-check-label">';
-                            text +='<input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="';
-                            text += json_flights.x[i];
-                            text += '">'+json_flights.x[i]+'</label></div>';
+                        for(i in json_flights[x]["flight_list"]){
+                            text +='<label class="form-check-label p-1">';
+                            text +='<input class="form-check-input" type="radio" name="flightRadio" id="flightRadio'+x+i+'" value="';
+                            text += json_flights[x]['flight_list'][i]+'_'+json_flights[x]["d_time"]+'_'+json_flights[x]["a_time"]+'_'+json_flights[x]["a_date"];
+                            text += '">'+json_flights[x]['flight_list'][i]+' </label>';
                         }
                         //end loop insert all flights
-                        text +='</div></div></fieldset>';
+                        text +='</div></div></div></fieldset>';
                         //end one flight list                       
                    }
                    //$("#blockFlights").append();
-                   console.log(text);
+                   //console.log(text);
                    document.getElementById("blockFlights").innerHTML = text;
 
                 }
+            function submitForm(){
+                $("#jumbotronForm").hide();
+                $("#jumbotronResult").show();
+                var fname =$('#inputName').val();
+                var lname = $('#inputLastName').val();
+                var email = $('#inputEmail').val();
+                var d_date = $('#d_date').val();
+                var f_airport = $('#inputFromAirport').val();
+                var t_airport = $('#inputToAirport').val();
+                var tempFlight = $('input[name="flightRadio"]:checked').val();
+                var selectedFlight = tempFlight.split("_")[0];
+                var d_time = tempFlight.split("_")[1];
+                var a_time = tempFlight.split("_")[2];
+                var a_date = tempFlight.split("_")[3];
+                var selectedPolicy=$('input[name="policyRadios"]:checked').val();
+                var strPost = '';
+                strPost = "fname="+fname+"&lname="+lname+"&email="+email+"&d_date="+d_date;
+                strPost += "&f_airport="+f_airport+"&t_airport="+t_airport+"&selectedFlight="+selectedFlight;
+                strPost += "&d_time="+d_time+"&a_time="+a_time+"&a_date="+a_date+"&selectedPoligy="+selectedPolicy;
+                //console.log(strPost);
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        $("#loaderResult").hide();
+                        //cert_result = JSON.parse(this.responseText);
+                        $('#certResult').html(this.responseText);
+                        //document.getElementById("certResult").innerHTML = this.responseText;
+                    }
+                };
+                xhttp.open("POST", "api/getcert", true);
+                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                xhttp.send(strPost);
+            }
+            // Function that validates email address through a regular expression.
+            function ValidateEmail(mail){
+                if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail))
+                {
+                    return true;
+                }
+                //alert("You have entered an invalid email address!")
+                return false;
+            }
         </script>
     </body>
 </html>
