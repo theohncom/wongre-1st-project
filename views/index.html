@@ -114,7 +114,7 @@
                                             <legend class="col-form-label col-sm-2 pt-0">Policy</legend>
                                             <div class="col-sm-10">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="policyRadios" id="policyRadios1" value="policy1" checked>
+                                                    <input class="form-check-input" type="radio" name="policyRadios" id="policyRadios1" value="policy1" checked required>
                                                     <label class="form-check-label" for="policyRadios1">
                                                         Delay in 15-29 minutes: Pay 500 Bath Recieve 2000 Bath.
                                                     </label>
@@ -149,19 +149,19 @@
                                                         <div class="form-group col-sm">
                                                             <!-- Name -->
                                                             <label for="cardName">Card Holder's Name</label>
-                                                            <input type="text" id="cardName" name="cardName" placeholder="Card Holder's Name" class="form-control">
+                                                            <input type="text" id="cardName" name="cardName" placeholder="Card Holder's Name" class="form-control" required>
                                                         </div>
                                                         <div class="form-group col-sm">
                                                             <!-- Card Number -->
                                                             <label class="control-label" for="cardNum">Card Number</label>
-                                                            <input type="text" id="cardNum" name="cardNum" placeholder="Card Number" class="form-control">
+                                                            <input type="text" id="cardNum" name="cardNum" placeholder="Card Number" class="form-control" required>
                                                         </div>
                                                     </div>
                                                     <div class="form-row">
                                                             <div class="form-group col-sm-3">
                                                                 <!-- Expiry date-->
                                                                 <label class="control-label" for="expiry_month">Card Expiry Date</label>
-                                                                <select class="form-control" name="expiry_month" id="expiry_month">
+                                                                <select class="form-control" name="expiry_month" id="expiry_month" required>
                                                                     <option disabled selected hidden value="">Choose..</option>
                                                                     <option value="01">Jan (01)</option>
                                                                     <option value="02">Feb (02)</option>
@@ -180,7 +180,7 @@
                                                             <div class="form-group col-sm-2">
                                                                 <!-- Expiry year-->
                                                                 <label class="control-label" for="expiry_month">Card Expiry year</label>
-                                                                <select class="form-control" name="expiry_year">
+                                                                <select class="form-control" name="expiry_year" required>
                                                                     <option disabled selected hidden value="">Choose..</option>    
                                                                     <option value="18">2018</option>
                                                                     <option value="19">2019</option>
@@ -198,7 +198,7 @@
                                                             <div class="form-group col-sm-3">
                                                                 <!-- CVV-->
                                                                 <label class="control-label"  for="cardCVV">Card CVV</label>
-                                                                <input type="password" id="cardCVV" name="cardCVV" placeholder="CVV" class="form-control">
+                                                                <input type="password" id="cardCVV" name="cardCVV" placeholder="CVV" class="form-control" required>
                                                             </div>
                                                     </div>
                                             </div>
@@ -323,8 +323,9 @@
                 }
 
                 function validateForm() {
+                    //alert(currentTab);
                 // This function deals with validation of the form fields
-                var x, y, i, valid = true;
+                var x, y, i, valid = true, radioCheck=false;
                 x = document.getElementsByClassName("tab");
                 y = x[currentTab].getElementsByTagName("input");
                 // A loop that checks every input field in the current tab:
@@ -346,6 +347,12 @@
                             valid = false;
                         }
                     }
+                    if (y[i].type == "radio"){
+                        radioCheck=radioCheck||y[i].checked;
+                    }
+                }
+                if ((!radioCheck) && (currentTab==1)){
+                    valid=false;
                 }
                 // If the valid status is true, mark the step as finished and valid:
                 if (valid) {
@@ -375,7 +382,7 @@
                     strPost += '&d_year='+$("#d_date").val().split('-')[0];
                     strPost += '&d_month='+$("#d_date").val().split('-')[1];
                     strPost += '&d_day='+$("#d_date").val().split('-')[2];
-                    console.log(strPost);
+                    //console.log(strPost);
                     var xhttp = new XMLHttpRequest();
                     xhttp.onreadystatechange = function() {
                         if (this.readyState == 4 && this.status == 200) {
@@ -392,9 +399,13 @@
                 }
 
                 function list_flights(json_flights){
+                    if(Object.keys(json_flights).length==0){
+                    alert("no flight");
+                    }
                     var text ='';
                    for(x in json_flights){
                        //console.log(json_flights[x]);
+                       //console.log(x);
                        // start one flight list
                         text +='<fieldset class="form-group">';
                         text +='<div class="row">';
@@ -405,9 +416,11 @@
                         text +='<div class="form-group col-sm"><div class="form-check form-check-inline">';
                         //loop insert all flights
                         for(i in json_flights[x]["flight_list"]){
+                            //console.log(i);
                             text +='<label class="form-check-label p-1">';
                             text +='<input class="form-check-input" type="radio" name="flightRadio" id="flightRadio'+x+i+'" value="';
                             text += json_flights[x]['flight_list'][i]+'_'+json_flights[x]["d_time"]+'_'+json_flights[x]["a_time"]+'_'+json_flights[x]["a_date"];
+                            //if (x=="Flight")
                             text += '">'+json_flights[x]['flight_list'][i]+' </label>';
                         }
                         //end loop insert all flights
@@ -417,6 +430,8 @@
                    //$("#blockFlights").append();
                    //console.log(text);
                    document.getElementById("blockFlights").innerHTML = text;
+                   document.getElementById("flightRadioflight00").required = true;
+                   
 
                 }
             function submitForm(){
