@@ -79,10 +79,10 @@ app.post('/api/searchflight', function(req,res){
  // direct way
   
   var resclient = new ResClient();
-  var queryStr = "https://api.flightstats.com/flex/flightstatus/rest/v2/json/route/status/";
-  queryStr += req.body.fromAirport+'/'+req.body.toAirport+'/';
-  queryStr += 'dep/'+req.body.d_year+'/'+req.body.d_month+'/'+req.body.d_day+'?';
-  queryStr += 'appId=3872726a&appKey=e6ecd704d1070c827f0466414de3a049&hourOfDay=0&utc=false&numHours=24';
+  var queryStr = "https://api.flightstats.com/flex/schedules/rest/v1/json/from/";
+  queryStr += req.body.fromAirport+'/to/'+req.body.toAirport+'/';
+  queryStr += 'arriving/'+req.body.d_year+'/'+req.body.d_month+'/'+req.body.d_day+'?';
+  queryStr += 'appId=3872726a&appKey=e6ecd704d1070c827f0466414de3a049';
   
   var flights ='';
   //console.log(req.body);
@@ -114,18 +114,18 @@ app.post('/api/searchflight', function(req,res){
   
     flights += '{';
     var counter = 0;
-    if(data.flightStatuses.length > 0){
+    if(data.scheduledFlights.length > 0){
 
-      for(i in data.flightStatuses){
+      for(i in data.scheduledFlights){
         //console.log(i);
         //console.log( data.flightStatuses[i].departureDate.dateLocal);
-        var d_time = data.flightStatuses[i].departureDate.dateLocal.split('T')[1];
-        var d_date = data.flightStatuses[i].departureDate.dateLocal.split('T')[0];
-        var a_time = data.flightStatuses[i].arrivalDate.dateLocal.split('T')[1];
-        var a_date = data.flightStatuses[i].arrivalDate.dateLocal.split('T')[0];
+        var d_time = data.scheduledFlights[i].departureTime.split('T')[1];
+        var d_date = data.scheduledFlights[i].departureTime.split('T')[0];
+        var a_time = data.scheduledFlights[i].arrivalTime.split('T')[1];
+        var a_date = data.scheduledFlights[i].arrivalTime.split('T')[0];
         
         var flightArr=[];
-        if ('J' == data.flightStatuses[i].schedule.flightType){
+        if ('J' == data.flightStatuses[i].serviceType){
           if (counter > 0) 
             flights += ',';
 
@@ -133,10 +133,10 @@ app.post('/api/searchflight', function(req,res){
           flights += '"flight'+counter+'":{ "d_time":"'+d_time+'", "d_date":"'+d_date+'",';
           flights += '"from":"'+req.body.fromAirport+'","to":"'+req.body.toAirport+'",';
           flights += '"a_time":"'+a_time+'", "a_date":"'+a_date+'","flight_list":[';
-          flights += '"'+data.flightStatuses[i].carrierFsCode+data.flightStatuses[i].flightNumber+'"';
+          flights += '"'+data.scheduledFlights[i].carrierFsCode+data.scheduledFlights[i].flightNumber+'"';
           if(data.flightStatuses[i].codeshares != null){
             for(j in data.flightStatuses[i].codeshares){
-              flights += ',"'+data.flightStatuses[i].codeshares[j].fsCode+data.flightStatuses[i].codeshares[j].flightNumber+'"';
+              flights += ',"'+data.flightStatuses[i].codeshares[j].carrierFsCode+data.flightStatuses[i].codeshares[j].flightNumber+'"';
             }
           }
           flights +=']}';
