@@ -1,0 +1,31 @@
+{
+  "name": "wongre-1st-project",
+  "version": "1.0.0",
+  "description": "wongre for thaire",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theohncom/wongre-1st-project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/theohncom/wongre-1st-project/issues"
+  },
+  "homepage": "https://github.com/theohncom/wongre-1st-project#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "bootstrap": "^4.1.1",
+    "express": "^4.16.3",
+    "html-pdf": "^2.2.0",
+    "jquery": "^3.3.1",
+    "node-rest-client": "^3.1.0",
+    "nodemailer": "^4.6.4",
+    "popper.js": "^1.14.3",
+    "replace-once": "^1.0.0"
+  }
+}
