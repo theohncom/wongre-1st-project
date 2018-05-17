@@ -1,3 +1,5 @@
+
+
 const ResClient = require('node-rest-client').Client;
 const nodemailer = require('nodemailer')
 const express = require('express');
@@ -16,6 +18,74 @@ var html_pdf = fs.readFileSync('./views/certificate.html', 'utf8');
 var options = { format: 'Letter' };
 
 var pathView =  __dirname+'/views/';
+
+//blockchain
+//provide engine sub-modules
+const ProviderEngine = require("web3-provider-engine");
+const CacheSubprovider = require("web3-provider-engine/subproviders/cache.js");
+const FilterSubprovider = require("web3-provider-engine/subproviders/filters.js");
+//const WalletSubprovider = require("web3-provider-engine/subproviders/wallet.js");
+const NonceSubprovider = require("web3-provider-engine/subproviders/nonce-tracker.js");
+const FetchSubprovider = require("web3-provider-engine/subproviders/fetch.js");
+
+
+
+//EthereumJS Wallet Sub-Provider
+//const WalletSubprovider = require('ethereumjs-wallet/provider-engine')
+const WalletSubprovider = require('web3-provider-engine/subproviders/wallet.js'); 
+const ethereumjsWallet = require('ethereumjs-wallet')
+
+//Web3 module
+const Web3 = require("web3");
+
+// end blockchain
+// blockchain
+// important constants
+const RPC_SERVER = 'https://ropsten.infura.io/ZrOc5VsO7Et26IFW0a7R';
+
+//Wallet Initialization
+const privateKey = 'ff72cfd40f59f17938d8d07d6d25092726c987ff058434f87bbeb98842329a12';
+var privateKeyBuffer = new Buffer(privateKey,"hex");
+var myWallet = ethereumjsWallet.fromPrivateKey(privateKeyBuffer);
+
+//Engine initialization & sub-provider attachment
+var engine = new ProviderEngine();
+
+
+// cache layer
+engine.addProvider(new CacheSubprovider())
+
+// filters
+engine.addProvider(new FilterSubprovider())
+
+// pending nonce
+engine.addProvider(new NonceSubprovider())
+
+// RCP server
+engine.addProvider(new FetchSubprovider({rpcUrl: RPC_SERVER}))
+
+// Wallet Attachment
+engine.addProvider(new WalletSubprovider(myWallet,{}))
+
+// network connectivity error
+engine.on('error', function(err){
+  // report connectivity errors
+  console.error(err.stack)
+})
+
+// start polling for blocks
+engine.start()
+
+//Actual Initialization of the web3 module
+var web3 = new Web3(engine)
+web3.eth.defaultAccount = '0x'+myWallet.getAddress().toString('hex');
+
+console.log(web3.version.api);
+//console.log(web3.version.getNode()); //  error when uncomment this line
+web3.version.getNode(function(err,result){
+    console.log(result);
+});
+// end blockchain
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
