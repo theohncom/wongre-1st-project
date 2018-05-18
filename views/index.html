@@ -141,6 +141,7 @@
                                         </div> 
                                 </fieldset>
                                 <hr>
+                                <h6>This is a demo version. Don't fill the form with real cradit card information!</h6>
                                 <fieldset class="form-group">
                                         <div class="row">
                                             <legend class="col-form-label col-sm-2 pt-0">Payment</legend>
@@ -278,10 +279,14 @@
                 airporttoselect.append(optionTo);
             }
             var currentTab = 0; // Current tab is set to be the first tab (0)
+            var haveFlight = true;
             showTab(currentTab); // Display the crurrent tab
 
             function showTab(n) {
                 if (n == 1){
+                    $('#blockFlights').empty();
+                    $('#loader').show();
+                    //alert("call search");
                     searchflights();
                 }
                 // This function will display the specified tab of the form...
@@ -290,23 +295,27 @@
                 //... and fix the Previous/Next buttons:
                 if (n == 0) {
                     document.getElementById("prevBtn").style.display = "none";
+                    if(!haveFlight)
+                        document.getElementById("nextBtn").style.display = "inline";
                 } else {
+                    
                     document.getElementById("prevBtn").style.display = "inline";
                 }
                 if (n == (x.length - 1)) {
                     document.getElementById("nextBtn").innerHTML = "Submit";
                 } else {
                     document.getElementById("nextBtn").innerHTML = "Next";
-                }
+                }              
                 //... and run a function that will display the correct step indicator:
                 fixStepIndicator(n)
             }
 
             function nextPrev(n) {
+               
                 // This function will figure out which tab to display
                 var x = document.getElementsByClassName("tab");
                 // Exit the function if any field in the current tab is invalid:
-                if (n <= 1 && !validateForm()) return false;
+                if (n <= 1 && !validateForm() && haveFlight)  return false;
                 // Hide the current tab:
                 x[currentTab].style.display = "none";
                 // Increase or decrease the current tab by 1:
@@ -399,41 +408,54 @@
                 }
 
                 function list_flights(json_flights){
-                    if(Object.keys(json_flights).length==0){
-                    alert("no flight");
-                    }
+                    //alert(Object.keys(json_flights).length);
                     var text ='';
-                   for(x in json_flights){
-                       //console.log(json_flights[x]);
-                       //console.log(x);
-                       // start one flight list
-                        text +='<fieldset class="form-group">';
-                        text +='<div class="row">';
-                        text +='<legend class="col-form-label col-sm-12 pt-0">';
-                        text += 'Departure: '+json_flights[x]["d_time"]+' '+json_flights[x]["d_date"]+' Arrival: '+json_flights[x]["a_time"]+' '+json_flights[x]["a_date"];
-                        text +='</legend></div>';
-                        text +='<div class="row"><div class="form-group col-sm-1"></div>';
-                        text +='<div class="form-group col-sm"><div class="form-check form-check-inline">';
-                        //loop insert all flights
-                        for(i in json_flights[x]["flight_list"]){
-                            //console.log(i);
-                            text +='<label class="form-check-label p-1">';
-                            text +='<input class="form-check-input" type="radio" name="flightRadio" id="flightRadio'+x+i+'" value="';
-                            text += json_flights[x]['flight_list'][i]+'_'+json_flights[x]["d_time"]+'_'+json_flights[x]["a_time"]+'_'+json_flights[x]["a_date"];
-                            //if (x=="Flight")
-                            text += '">'+json_flights[x]['flight_list'][i]+' </label>';
+                    if(Object.keys(json_flights).length==0){
+                    //alert("No available flights.");
+                        text+="<p>No available flights.</p>";
+                        haveFlight = false;
+                    }
+                    else{
+                        haveFlight = true;
+                        for(x in json_flights){
+                            //console.log(json_flights[x]);
+                            //console.log(x);
+                            // start one flight list
+                                text +='<fieldset class="form-group">';
+                                text +='<div class="row">';
+                                text +='<legend class="col-form-label col-sm-12 pt-0">';
+                                text += 'Departure: '+json_flights[x]["d_time"]+' '+json_flights[x]["d_date"]+' Arrival: '+json_flights[x]["a_time"]+' '+json_flights[x]["a_date"];
+                                text +='</legend></div>';
+                                text +='<div class="row"><div class="form-group col-sm-1"></div>';
+                                text +='<div class="form-group col-sm"><div class="form-check form-check-inline">';
+                                //loop insert all flights
+                                for(i in json_flights[x]["flight_list"]){
+                                    //console.log(i);
+                                    text +='<label class="form-check-label p-1">';
+                                    text +='<input class="form-check-input" type="radio" name="flightRadio" id="flightRadio'+x+i+'" value="';
+                                    text += json_flights[x]['flight_list'][i]+'_'+json_flights[x]["d_time"]+'_'+json_flights[x]["a_time"]+'_'+json_flights[x]["a_date"];
+                                    //if (x=="Flight")
+                                    text += '">'+json_flights[x]['flight_list'][i]+' </label>';
+                                }
+                                //end loop insert all flights
+                                text +='</div></div></div></fieldset>';
+                                //end one flight list                       
                         }
-                        //end loop insert all flights
-                        text +='</div></div></div></fieldset>';
-                        //end one flight list                       
-                   }
+
+                    }
+                    
+                   
                    //$("#blockFlights").append();
                    //console.log(text);
                    document.getElementById("blockFlights").innerHTML = text;
-                   document.getElementById("flightRadioflight00").required = true;
+                   if(haveFlight){
+                    document.getElementById("flightRadioflight00").required = true;
+                   }else{
+                    document.getElementById("nextBtn").style.display = "none";
+                   }
                    
-
                 }
+
             function submitForm(){
                 $("#jumbotronForm").hide();
                 $("#jumbotronResult").show();
