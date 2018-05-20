@@ -175,11 +175,43 @@ app.post('/api/flightStatus',function(req,res){
   })
 })
 
+
+function contract2DB(myobj){
+  var MongoClient = require('mongodb').MongoClient;
+  var url = "mongodb://localhost:27017/";
+
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("customerContract");
+    dbo.collection("customers").insertOne(myobj, function(err, res) {
+      if (err) throw err;
+      console.log("1 document inserted");
+      db.close();
+    });
+  });
+}
+
 app.post('/api/getcert', function(req,res){
   //step0. call smart contract
   //step1. copy certificate.html -> certificate_uniquevale.html
   //step2. convert certificate_uniquevalu.html -> certificate_uniquevalue.pdf
   //step3. send certificate_uniquevalue.html as text to web client
+  
+  // add to DB
+  var data2DB={
+    fname: req.body.fname,
+    lname: req.body.lname,
+    email: req.body.email,
+    txHash: req.body.txHash,
+    selectedFlight: req.body.selectedFlight,
+    f_airport: req.body.f_airport,
+    t_airport: req.body.t_airport,
+    d_date: req.body.d_date,
+    d_time: req.body.d_time,
+    a_date: req.body.a_date,
+    a_time: req.body.a_time
+  }
+  contract2DB(data2DB)
 
   //console.log(req.body);
   var certHTML_pdf = html_pdf;
@@ -189,9 +221,11 @@ app.post('/api/getcert', function(req,res){
  'replaceToAirport', 'replaceAMonth', 'replaceADay', 'replaceAYear', 'replaceATime'];
   var replace = [req.body.fname, req.body.lname, req.body.email, req.body.txHash, req.body.selectedFlight.substring(0, 2), req.body.selectedFlight.substring(2),
  req.body.f_airport, req.body.d_date.split('-')[1], req.body.d_date.split('-')[2], req.body.d_date.split('-')[0], req.body.d_time,
- req.body.t_airport, req.body.a_date.split('-')[1], req.body.a_date.split('-')[2], req.body.d_date.split('-')[0], req.body.a_time];
+ req.body.t_airport, req.body.a_date.split('-')[1], req.body.a_date.split('-')[2], req.body.a_date.split('-')[0], req.body.a_time];
   certHTML_pdf=replaceOnce(certHTML_pdf, find, replace, 'g');
   certHTML_table=replaceOnce(certHTML_table, find, replace, 'g');
+
+  //
 
   setTimeout(function() {
     res.end(certHTML_table);
