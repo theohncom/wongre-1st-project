@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="no-js" lang="en">
     <head>
-        <title>WongRe</title>
+        <title>DigitalRe</title>
         <meta http-equiv="x-ua-compatible" content="ie=edge">
 	    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -9,12 +9,14 @@
         <link rel='stylesheet' href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="/css/bootstrap.css">
         <link rel="stylesheet" href="/css/styles.css">
+
+        <script src="/web3/web3.min.js"></script>
     </head>
 
     <body>
             <div class="container">
                     <nav class="navbar navbar-expand-lg navbar-dark bg-primary pt-0 pb-0">
-                        <a class="navbar-brand" href="#">WongRe</a>
+                        <a class="navbar-brand" href="#">DigitalRe</a>
                         
                         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
                                 <span class="navbar-toggler-icon"></span>
@@ -251,7 +253,7 @@
             <!--Copyright-->
             <div class="footer-copyright py-2 text-center">
                     © 2018 Copyright:
-                    <a href="#"> WongRe.com </a>
+                    <a href="#"> DigitalRe.com </a>
             </div>
             <!--/.Copyright-->
                           
@@ -323,7 +325,8 @@
                 // if you have reached the end of the form...
                 if (currentTab >= x.length) {
                     // ... the form gets submitted:
-                    submitForm();
+                    //submitForm();
+                    beforeSubmitForm();
                     //document.getElementById("regForm").submit();
                     return false;
                 }
@@ -455,10 +458,10 @@
                    }
                    
                 }
-
-            function submitForm(){
-                $("#jumbotronForm").hide();
-                $("#jumbotronResult").show();
+            
+            function submitForm(result){
+                //$("#jumbotronForm").hide();
+                //$("#jumbotronResult").show();
                 var fname =$('#inputName').val();
                 var lname = $('#inputLastName').val();
                 var email = $('#inputEmail').val();
@@ -475,7 +478,8 @@
                 strPost = "fname="+fname+"&lname="+lname+"&email="+email+"&d_date="+d_date;
                 strPost += "&f_airport="+f_airport+"&t_airport="+t_airport+"&selectedFlight="+selectedFlight;
                 strPost += "&d_time="+d_time+"&a_time="+a_time+"&a_date="+a_date+"&selectedPoligy="+selectedPolicy;
-                //console.log(strPost);
+                strPost += "&txHash="+result.transactionHash;
+                console.log(strPost);
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
@@ -498,6 +502,202 @@
                 //alert("You have entered an invalid email address!")
                 return false;
             }
+
+            // blockchain zone
+            if (typeof web3 !== 'undefined') {
+                web3 = new Web3(web3.currentProvider);
+            } else {
+            // set the provider you want from Web3.providers
+                web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+            }
+            web3.eth.defaultAccount = web3.eth.accounts[0];
+            var OpenTXContract = web3.eth.contract([
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": false,
+                        "name": "f_date",
+                        "type": "bytes16"
+                    },
+                    {
+                        "indexed": false,
+                        "name": "f_dtime",
+                        "type": "bytes16"
+                    },
+                    {
+                        "indexed": false,
+                        "name": "f_atime",
+                        "type": "bytes16"
+                    },
+                    {
+                        "indexed": false,
+                        "name": "f_No",
+                        "type": "bytes16"
+                    },
+                    {
+                        "indexed": false,
+                        "name": "policy_choice",
+                        "type": "bytes32"
+                    }
+                ],
+                "name": "clientContractInfo",
+                "type": "event"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "_address",
+                        "type": "address"
+                    },
+                    {
+                        "name": "_date",
+                        "type": "bytes16"
+                    },
+                    {
+                        "name": "_dtime",
+                        "type": "bytes16"
+                    },
+                    {
+                        "name": "_atime",
+                        "type": "bytes16"
+                    },
+                    {
+                        "name": "_No",
+                        "type": "bytes16"
+                    },
+                    {
+                        "name": "_policy_choice",
+                        "type": "bytes32"
+                    }
+                ],
+                "name": "setClientContract",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "clientInfosAccts",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "countClientContract",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    {
+                        "name": "_address",
+                        "type": "address"
+                    }
+                ],
+                "name": "getClientContract",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "bytes16"
+                    },
+                    {
+                        "name": "",
+                        "type": "bytes16"
+                    },
+                    {
+                        "name": "",
+                        "type": "bytes16"
+                    },
+                    {
+                        "name": "",
+                        "type": "bytes16"
+                    },
+                    {
+                        "name": "",
+                        "type": "bytes32"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "getClientContracts",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address[]"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ]);
+        var OpenTX = OpenTXContract.at('0x3cffe41e5c9e0948d1521aa6928a985cc6eaee6e');
+        console.log(OpenTX);
+        
+        var clientContractInfoEvent = OpenTX.clientContractInfo({}, 'latest');
+
+        clientContractInfoEvent.watch(function(error, result) {
+            if (result) {
+                console.log(result);
+                submitForm(result);
+
+            }
+                
+        })
+
+        function beforeSubmitForm(){
+            //call smartcontract
+            $("#jumbotronForm").hide();
+            $("#jumbotronResult").show();
+            var d_date = $('#d_date').val(); 
+            var tempFlight = $('input[name="flightRadio"]:checked').val();
+            var selectedFlight = tempFlight.split("_")[0];
+            var d_time = tempFlight.split("_")[1];
+            var a_time = tempFlight.split("_")[2];
+            var selectedPolicy=$('input[name="policyRadios"]:checked').val();
+            OpenTX.setClientContract(web3.eth.defaultAccount, d_date, d_time, a_time, selectedFlight, selectedPolicy, (err, res) => {
+               if (err) {
+				console.log(err);
+               }
+           });
+           
+           //sunmitForm
+           //submitForm()
+
+
+        }
+        
+
         </script>
     </body>
 </html>

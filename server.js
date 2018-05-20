@@ -50,6 +50,7 @@ app.use('/js',express.static(__dirname+'/alljs'));
 app.use('/css',express.static(__dirname+'/node_modules/bootstrap/dist/css'));
 app.use('/css',express.static(__dirname+'/customcss'));
 app.use('/images',express.static(__dirname+'/all_images'));
+app.use('/web3',express.static(__dirname+'/node_modules/web3/dist'))
 
 
 
@@ -186,7 +187,7 @@ app.post('/api/getcert', function(req,res){
   var find = ['replaceName', 'replaceLName', 'replaceEmail', 'replaceTxHash', 'replaceCarrier', 'replaceFlightNum', 
   'replaceFromAriport', 'replaceDMonth', 'replaceDDay', 'replaceDYear', 'replaceDTime',
  'replaceToAirport', 'replaceAMonth', 'replaceADay', 'replaceAYear', 'replaceATime'];
-  var replace = [req.body.fname, req.body.lname, req.body.email, 'transection hash', req.body.selectedFlight.substring(0, 2), req.body.selectedFlight.substring(2),
+  var replace = [req.body.fname, req.body.lname, req.body.email, req.body.txHash, req.body.selectedFlight.substring(0, 2), req.body.selectedFlight.substring(2),
  req.body.f_airport, req.body.d_date.split('-')[1], req.body.d_date.split('-')[2], req.body.d_date.split('-')[0], req.body.d_time,
  req.body.t_airport, req.body.a_date.split('-')[1], req.body.a_date.split('-')[2], req.body.d_date.split('-')[0], req.body.a_time];
   certHTML_pdf=replaceOnce(certHTML_pdf, find, replace, 'g');
@@ -215,8 +216,6 @@ var pdfFullPath = './certificatepdf/'+pdfFileName;
   });
   
 })
-
-
 
 app.listen(3000,function(){
     console.log('Server running on port 3000')

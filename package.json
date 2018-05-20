@@ -26,6 +26,7 @@
     "node-rest-client": "^3.1.0",
     "nodemailer": "^4.6.4",
     "popper.js": "^1.14.3",
-    "replace-once": "^1.0.0"
+    "replace-once": "^1.0.0",
+    "web3": "^0.20.6"
   }
 }
