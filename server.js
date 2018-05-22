@@ -1,9 +1,11 @@
 const ResClient = require('node-rest-client').Client;
+const ResClientPromise = require('node-rest-client-promise').Client;
 const nodemailer = require('nodemailer')
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const replaceOnce = require('replace-once');
+
 
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 app.use(bodyParser.json()); // support json encoded bodies
@@ -64,6 +66,10 @@ app.get('/backup',function(req,res){
 
 app.get('/certificate',function(req,res){
     res.sendFile(pathView + "certificate.html");
+})
+
+app.get('/flightstatus',function(req,res){
+  res.sendFile(pathView + "flightStatus.html");
 })
 
 
@@ -134,10 +140,10 @@ app.post('/api/searchflight', function(req,res){
           flights += '"flight'+counter+'":{ "d_time":"'+d_time+'", "d_date":"'+d_date+'",';
           flights += '"from":"'+req.body.fromAirport+'","to":"'+req.body.toAirport+'",';
           flights += '"a_time":"'+a_time+'", "a_date":"'+a_date+'","flight_list":[';
-          flights += '"'+data.scheduledFlights[i].carrierFsCode+data.scheduledFlights[i].flightNumber+'"';
+          flights += '"'+data.scheduledFlights[i].carrierFsCode+'-'+data.scheduledFlights[i].flightNumber+'"';
           if(data.scheduledFlights[i].codeshares != null){
             for(j in data.scheduledFlights[i].codeshares){
-              flights += ',"'+data.scheduledFlights[i].codeshares[j].carrierFsCode+data.scheduledFlights[i].codeshares[j].flightNumber+'"';
+              flights += ',"'+data.scheduledFlights[i].codeshares[j].carrierFsCode+'-'+data.scheduledFlights[i].codeshares[j].flightNumber+'"';
             }
           }
           flights +=']}';
@@ -155,6 +161,135 @@ app.post('/api/searchflight', function(req,res){
 })
 
 
+function updateDB(queryObj){
+  // queryObj={
+  //            carrierFsCode:"TG",
+  //            flightNumber: "808",
+  //            a_date: "2018-05-23"
+  //            status: Delay     [Delay,Close,NA] 
+  // }
+  var MongoClient = require('mongodb').MongoClient;
+  var url = "mongodb://localhost:27017/customerContract";
+
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("mydb");
+    var myquery = { selectedFlight: queryObj.carrierFsCode+-+queryObj.flightNumber,
+       a_date: queryObj.a_date, status: "NA" };
+    var newvalues = { $set: {status: queryObj.status} };
+    dbo.collection("customers").updateOne(myquery, newvalues, function(err, res) {
+      if (err) throw err;
+      console.log("1 document updated");
+      db.close();
+    });
+  });
+}
+
+app.post('api/closeAndCompensation',function(req,res){
+  // step1: update all flights that their a_date is equal to a_date from query string
+  //        update only the flight status in [Delay,Normal]
+  // step2: send email to users that their flight in the result in step1
+
+
+})
+
+app.post('/api/searchflightdb', async function(req,res){
+  
+  // step1: query all fights on a spcificed a_date
+  // output: all flights that their a_date equel to a_date in query string
+  // step2: by list of flight from step1 then query from web api
+  //        to check a real arrival time
+  // output: list of all flights in DB together with their status that reported by api
+  // EX: {
+  //       "1":{"flightNum": "NH808", "status":"Delay"},
+  //       "2":{"flightNum": "TG402", "status":"Normal"},
+  //       "3":{"flightNum": "ANA220", "status":"Unknown"}
+  //  } 
+
+  
+  try{
+    var responseResult={};
+    var MongoClient = require('mongodb').MongoClient;
+    var url = "mongodb://localhost:27017/customerContract";
+    var query = { a_date: req.body.a_date};
+    //console.log(req.body.a_date)
+    var db = await MongoClient.connect(url);
+    var dbo = db.db('customerContract');
+    var dbResult = await dbo.collection("customers").find(query).toArray()
+    db.close()
+    if (dbResult.length > 0){
+      var db2queryObj ={}
+      for(i in dbResult){
+        var queryObj={
+            carrierFsCode : dbResult[i].selectedFlight.split('-')[0],
+            flightNumber : dbResult[i].selectedFlight.split('-')[1],
+            a_year:dbResult[i].a_date.split('-')[0],
+            a_month:dbResult[i].a_date.split('-')[1],
+            a_date:dbResult[i].a_date.split('-')[2]
+        }
+        db2queryObj[i]=queryObj
+      }
+      //console.log(db2queryObj)
+      //send db2queryObj to web api
+      responseResult= await callApiFlightStatus(db2queryObj)
+    }
+    //console.log(responseResult)
+    res.send(JSON.stringify(responseResult))
+  }catch(err){
+      console.log(err)
+      res.send(JSON.stringify(responseResult))
+  }
+})
+
+function callwebApi(queryStr){
+  return new Promise((resolve, reject)=>{
+    var resclient = new ResClient();
+    resclient.get(queryStr, function (data, response){
+      resolve(data)
+    })
+  })
+}
+
+function callApiFlightStatus(queryObj){
+  return new Promise(async (resolve, reject)=>{
+    // kick off some async work
+    var result=[]
+    for (i in queryObj){
+      var queryStr = 'https://api.flightstats.com/flex/flightstatus/rest/v2/json/flight/status/';
+      queryStr += queryObj[i].carrierFsCode+'/'+queryObj[i].flightNumber+'/arr/';
+      queryStr += queryObj[i].a_year+'/'+queryObj[i].a_month+'/'+queryObj[i].a_date+'?';
+      queryStr += 'appId=3872726a&appKey=e6ecd704d1070c827f0466414de3a049&utc=false';
+      //console.log(queryStr)
+      //console.log(i)
+      try{     
+        result[i] = await callwebApi(queryStr)
+        //console.log(tmp)
+      }catch(error){
+        console.log(error)
+      }
+    }
+    var objResult={};
+    var count = 0;
+    //console.log(result)
+    for (j in result){
+      //console.log("result:",result[j]);
+      if(result[j].flightStatuses[0].operationalTimes.hasOwnProperty('actualRunwayArrival')){
+        objResult[count]={
+          carrierFsCode: result[j].flightStatuses[0].carrierFsCode,
+          flightNumber: result[j].flightStatuses[0].flightNumber,
+          p_local_date: result[j].flightStatuses[0].arrivalDate.dateLocal.split('T')[0],
+          p_local_time: result[j].flightStatuses[0].arrivalDate.dateLocal.split('T')[1].split('.')[0],
+          a_local_date: result[j].flightStatuses[0].operationalTimes.actualRunwayArrival.dateLocal.split('T')[0],
+          a_local_time: result[j].flightStatuses[0].operationalTimes.actualRunwayArrival.dateLocal.split('T')[1].split('.')[0]
+        }
+        count +=1
+      }
+    }
+    console.log(objResult)
+    resolve(objResult)
+  })
+}
+
 app.post('/api/flightStatus',function(req,res){
   //console.log(req.body);
   var resclient = new ResClient();
@@ -166,6 +301,7 @@ app.post('/api/flightStatus',function(req,res){
   //myStr="https://api.flightstats.com/flex/flightstatus/rest/v2/json/flight/status/NH/808/arr/2018/5/12?appId=3872726a&appKey=e6ecd704d1070c827f0466414de3a049&utc=false";
   var output='';
   resclient.get(queryStr, function (data, response) {
+    //console.log(data);
     var date = data.flightStatuses[0].operationalTimes.actualRunwayArrival.dateLocal.split('T')[0];
     var time = data.flightStatuses[0].operationalTimes.actualRunwayArrival.dateLocal.split('T')[1];
     //console.log(data.flightStatuses[0].operationalTimes.actualRunwayArrival.dateLocal);
@@ -209,7 +345,8 @@ app.post('/api/getcert', function(req,res){
     d_date: req.body.d_date,
     d_time: req.body.d_time,
     a_date: req.body.a_date,
-    a_time: req.body.a_time
+    a_time: req.body.a_time,
+    status: "NA"
   }
   contract2DB(data2DB)
 
@@ -219,7 +356,7 @@ app.post('/api/getcert', function(req,res){
   var find = ['replaceName', 'replaceLName', 'replaceEmail', 'replaceTxHash', 'replaceCarrier', 'replaceFlightNum', 
   'replaceFromAriport', 'replaceDMonth', 'replaceDDay', 'replaceDYear', 'replaceDTime',
  'replaceToAirport', 'replaceAMonth', 'replaceADay', 'replaceAYear', 'replaceATime'];
-  var replace = [req.body.fname, req.body.lname, req.body.email, req.body.txHash, req.body.selectedFlight.substring(0, 2), req.body.selectedFlight.substring(2),
+  var replace = [req.body.fname, req.body.lname, req.body.email, req.body.txHash, req.body.selectedFlight.split('-')[0], req.body.selectedFlight.split('-')[1],
  req.body.f_airport, req.body.d_date.split('-')[1], req.body.d_date.split('-')[2], req.body.d_date.split('-')[0], req.body.d_time,
  req.body.t_airport, req.body.a_date.split('-')[1], req.body.a_date.split('-')[2], req.body.a_date.split('-')[0], req.body.a_time];
   certHTML_pdf=replaceOnce(certHTML_pdf, find, replace, 'g');
