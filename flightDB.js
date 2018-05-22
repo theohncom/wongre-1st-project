@@ -35,7 +35,10 @@ MongoClient.connect(url, function(err, db) {
   var query = { a_date: "2018-05-23" };
   dbo.collection("customers").find(query).toArray(function(err, result) {
     if (err) throw err;
-    console.log(result);
+    console.log(result.a_time);
+    for(i in result){
+      
+    }
     db.close();
   });
 });
