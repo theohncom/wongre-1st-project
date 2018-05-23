@@ -19,6 +19,8 @@ var options = { format: 'Letter' };
 
 var pathView =  __dirname+'/views/';
 
+const delayThreshold = 120 // in minute
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -161,37 +163,146 @@ app.post('/api/searchflight', function(req,res){
 })
 
 
-function updateDB(queryObj){
-  // queryObj={
+async function queryDB4UpdateStatus(query){
+  var result=[]
+  try{
+      //console.log('in queryDB4UpdaeStatus',query)
+      var MongoClient = require('mongodb').MongoClient;
+      var url = "mongodb://localhost:27017/";
+      //var query = { a_date: "2018-05-22" , status:"NA"};
+      var db = await MongoClient.connect(url);
+      var dbo = db.db("customerContract");
+      result = await dbo.collection("customers").find(query).toArray()
+      return result
+  }catch(err){
+    //console.log('error----------')
+    console.log(err)
+    return ressult
+  }
+  
+
+}
+
+
+
+function updateDBSet(queryObjs){
+  // queryObjs={1:{
   //            carrierFsCode:"TG",
   //            flightNumber: "808",
   //            a_date: "2018-05-23"
   //            status: Delay     [Delay,Close,NA] 
-  // }
+  //      }
+  //    }
   var MongoClient = require('mongodb').MongoClient;
-  var url = "mongodb://localhost:27017/customerContract";
+  var url = "mongodb://localhost:27017/";
 
   MongoClient.connect(url, function(err, db) {
     if (err) throw err;
-    var dbo = db.db("mydb");
-    var myquery = { selectedFlight: queryObj.carrierFsCode+-+queryObj.flightNumber,
-       a_date: queryObj.a_date, status: "NA" };
-    var newvalues = { $set: {status: queryObj.status} };
-    dbo.collection("customers").updateOne(myquery, newvalues, function(err, res) {
-      if (err) throw err;
-      console.log("1 document updated");
-      db.close();
-    });
+    var dbo = db.db("customerContract");
+    for (i in queryObjs){
+      var myquery = { selectedFlight: queryObjs[i].carrierFsCode+-+queryObjs[i].flightNumber,
+        a_date: queryObjs[i].p_local_date, status: "NA" };
+      var newvalues = { $set: {status: queryObjs[i].status} };
+      console.log(myquery)
+      dbo.collection("customers").updateMany(myquery, newvalues, function(err, res) {
+        if (err) throw err;
+        console.log("1 document updated");
+      });
+
+    }
+    db.close();
   });
 }
 
-app.post('api/closeAndCompensation',function(req,res){
+app.post('/api/closeAndCompensation',async function(req,res){
+  // input is a_date
   // step1: update all flights that their a_date is equal to a_date from query string
   //        update only the flight status in [Delay,Normal]
   // step2: send email to users that their flight in the result in step1
 
+  var query={a_date: req.body.a_date, status:"NA"}
+  //console.log(query)
+  var queryRes = await queryDB4UpdateStatus(query)
+  var numOfItem=0
+  var resApiFlightStatus=[]
+  //console.log('---',queryRes.length)
+  if (queryRes.length > 0){
+     //console.log(queryRes);
+    // 1. queryApi to find ethier schedule or delay for every flight
+    var db2queryObj ={}
+    for (i in queryRes){
+        var queryObj={
+          id: queryRes[i]._id,
+          carrierFsCode : queryRes[i].selectedFlight.split('-')[0],
+          flightNumber : queryRes[i].selectedFlight.split('-')[1],
+          a_year: queryRes[i].a_date.split('-')[0],
+          a_month: queryRes[i].a_date.split('-')[1],
+          a_date: queryRes[i].a_date.split('-')[2]
+        }
+        db2queryObj[i]=queryObj
+      }
+    //console.log('------------------------------')
+    //console.log(db2queryObj)
+    //console.log('------------------------------')
 
+    resApiFlightStatus= await callApiFlightStatus(db2queryObj)
+    //console.log('++++++++++++++++++++++++++++++++++++')
+    //console.log(resApiFlightStatus)
+    //console.log('++++++++++++++++++++++++++++++++++++')
+    //2. find delay or schedule
+    for (i in resApiFlightStatus){
+      timeDiff=findTimeDiff(resApiFlightStatus[i])
+      resApiFlightStatus[i]["timeDiff"]=timeDiff
+    } 
+    //console.log(resApiFlightStatus)
+    
+    // 3. send email
+    for (i in resApiFlightStatus){
+        var mailOptions={
+            from: 'wongrecrop@gmail.com',
+            to: queryRes[i].email,
+            subject: 'Flight Delay insurance information',
+            text: 'Your flight('+resApiFlightStatus[i].carrierFsCode+resApiFlightStatus[i].flightNumber +') arrived on schedule. Thank you for using our service.',
+          }
+        var textDelay = 'Your flight('+resApiFlightStatus[i].carrierFsCode+resApiFlightStatus[i].flightNumber +') is delayed. We have already transferred your compensation.' 
+            textDelay += 'Thank you for using our service.'
+        if(resApiFlightStatus[i].timeDiff > delayThreshold){
+          resApiFlightStatus[i].status = 'Delay'
+            mailOptions.text = textDelay
+        }else{
+          resApiFlightStatus[i].status = 'Schedule'
+        }
+        transporter.sendMail(mailOptions, function(error, info){
+          if (error) {
+              console.log(error);
+          } else {
+              console.log('Email sent: ' + info.response);
+          }
+        });
+      }
+
+    console.log(resApiFlightStatus)
+    
+    // 4. update db
+    updateDBSet(resApiFlightStatus)
+    
+  }
+  // return with a number of updated items 
+  //res.send(resApiFlightStatus.length)
+  res.send(String(resApiFlightStatus.length));
 })
+
+function findTimeDiff(obj){
+  //6 numbers specify year, month, day, hour, minute, second:
+  var arrA_date = obj.a_local_date.split('-')
+  var arrA_time = obj.a_local_time.split(':')
+  var actArr = new Date(arrA_date[0],arrA_date[1],arrA_date[2],arrA_time[0],arrA_time[1],arrA_time[2])
+  var arrP_date = obj.p_local_date.split('-')
+  var arrP_time = obj.p_local_time.split(':')
+  var plnArr = new Date(arrP_date[0],arrP_date[1],arrP_date[2],arrP_time[0],arrP_time[1],arrP_time[2])
+  var difftime = ((actArr - plnArr)/1000)/60
+  return difftime
+}
 
 app.post('/api/searchflightdb', async function(req,res){
   
@@ -210,8 +321,8 @@ app.post('/api/searchflightdb', async function(req,res){
   try{
     var responseResult={};
     var MongoClient = require('mongodb').MongoClient;
-    var url = "mongodb://localhost:27017/customerContract";
-    var query = { a_date: req.body.a_date};
+    var url = "mongodb://localhost:27017/";
+    var query = { a_date: req.body.a_date, status: "NA"};
     //console.log(req.body.a_date)
     var db = await MongoClient.connect(url);
     var dbo = db.db('customerContract');
@@ -253,6 +364,7 @@ function callwebApi(queryStr){
 function callApiFlightStatus(queryObj){
   return new Promise(async (resolve, reject)=>{
     // kick off some async work
+    //console.log('query Length',queryObj)
     var result=[]
     for (i in queryObj){
       var queryStr = 'https://api.flightstats.com/flex/flightstatus/rest/v2/json/flight/status/';
@@ -261,8 +373,11 @@ function callApiFlightStatus(queryObj){
       queryStr += 'appId=3872726a&appKey=e6ecd704d1070c827f0466414de3a049&utc=false';
       //console.log(queryStr)
       //console.log(i)
-      try{     
+      try{ 
+        //console.log(i)    
         result[i] = await callwebApi(queryStr)
+        //console.log('***************************')
+        //console.log(result[i])
         //console.log(tmp)
       }catch(error){
         console.log(error)
@@ -275,8 +390,10 @@ function callApiFlightStatus(queryObj){
       //console.log("result:",result[j]);
       if(result[j].flightStatuses[0].operationalTimes.hasOwnProperty('actualRunwayArrival')){
         objResult[count]={
-          carrierFsCode: result[j].flightStatuses[0].carrierFsCode,
-          flightNumber: result[j].flightStatuses[0].flightNumber,
+          carrierFsCode: result[j].request.airline.fsCode,
+          flightNumber: result[j].request.flight.requested,
+          //carrierFsCode: result[j].flightStatuses[0].carrierFsCode,
+          //flightNumber: result[j].flightStatuses[0].flightNumber,
           p_local_date: result[j].flightStatuses[0].arrivalDate.dateLocal.split('T')[0],
           p_local_time: result[j].flightStatuses[0].arrivalDate.dateLocal.split('T')[1].split('.')[0],
           a_local_date: result[j].flightStatuses[0].operationalTimes.actualRunwayArrival.dateLocal.split('T')[0],
@@ -285,7 +402,7 @@ function callApiFlightStatus(queryObj){
         count +=1
       }
     }
-    console.log(objResult)
+    //console.log(objResult)
     resolve(objResult)
   })
 }

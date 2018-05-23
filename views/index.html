@@ -512,156 +512,156 @@
             }
             web3.eth.defaultAccount = web3.eth.accounts[0];
             var OpenTXContract = web3.eth.contract([
-                    {
-                        "constant": true,
-                        "inputs": [],
-                        "name": "getClientContracts",
-                        "outputs": [
-                            {
-                                "name": "",
-                                "type": "address[]"
-                            }
-                        ],
-                        "payable": false,
-                        "stateMutability": "view",
-                        "type": "function"
-                    },
-                    {
-                        "constant": true,
-                        "inputs": [
-                            {
-                                "name": "_address",
-                                "type": "address"
-                            }
-                        ],
-                        "name": "getClientContract",
-                        "outputs": [
-                            {
-                                "name": "",
-                                "type": "bytes16"
-                            },
-                            {
-                                "name": "",
-                                "type": "bytes16"
-                            },
-                            {
-                                "name": "",
-                                "type": "bytes16"
-                            },
-                            {
-                                "name": "",
-                                "type": "bytes16"
-                            },
-                            {
-                                "name": "",
-                                "type": "bytes32"
-                            }
-                        ],
-                        "payable": false,
-                        "stateMutability": "view",
-                        "type": "function"
-                    },
-                    {
-                        "constant": false,
-                        "inputs": [
-                            {
-                                "name": "_address",
-                                "type": "address"
-                            },
-                            {
-                                "name": "_date",
-                                "type": "bytes16"
-                            },
-                            {
-                                "name": "_dtime",
-                                "type": "bytes16"
-                            },
-                            {
-                                "name": "_atime",
-                                "type": "bytes16"
-                            },
-                            {
-                                "name": "_No",
-                                "type": "bytes16"
-                            },
-                            {
-                                "name": "_policy_choice",
-                                "type": "bytes32"
-                            }
-                        ],
-                        "name": "setClientContract",
-                        "outputs": [],
-                        "payable": false,
-                        "stateMutability": "nonpayable",
-                        "type": "function"
-                    },
-                    {
-                        "constant": true,
-                        "inputs": [],
-                        "name": "countClientContract",
-                        "outputs": [
-                            {
-                                "name": "",
-                                "type": "uint256"
-                            }
-                        ],
-                        "payable": false,
-                        "stateMutability": "view",
-                        "type": "function"
-                    },
-                    {
-                        "constant": true,
-                        "inputs": [
-                            {
-                                "name": "",
-                                "type": "uint256"
-                            }
-                        ],
-                        "name": "clientInfosAccts",
-                        "outputs": [
-                            {
-                                "name": "",
-                                "type": "address"
-                            }
-                        ],
-                        "payable": false,
-                        "stateMutability": "view",
-                        "type": "function"
-                    },
-                    {
-                        "anonymous": false,
-                        "inputs": [
-                            {
-                                "indexed": false,
-                                "name": "f_date",
-                                "type": "bytes16"
-                            },
-                            {
-                                "indexed": false,
-                                "name": "f_dtime",
-                                "type": "bytes16"
-                            },
-                            {
-                                "indexed": false,
-                                "name": "f_atime",
-                                "type": "bytes16"
-                            },
-                            {
-                                "indexed": false,
-                                "name": "f_No",
-                                "type": "bytes16"
-                            },
-                            {
-                                "indexed": false,
-                                "name": "policy_choice",
-                                "type": "bytes32"
-                            }
-                        ],
-                        "name": "clientContractInfo",
-                        "type": "event"
-                    }
-                ]);
-        var OpenTX = OpenTXContract.at('0xacf71fe3f40e17480492581a4b1038a5c6a9353c');
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "f_date",
+				"type": "bytes16"
+			},
+			{
+				"indexed": false,
+				"name": "f_dtime",
+				"type": "bytes16"
+			},
+			{
+				"indexed": false,
+				"name": "f_atime",
+				"type": "bytes16"
+			},
+			{
+				"indexed": false,
+				"name": "f_No",
+				"type": "bytes16"
+			},
+			{
+				"indexed": false,
+				"name": "policy_choice",
+				"type": "bytes32"
+			}
+		],
+		"name": "clientContractInfo",
+		"type": "event"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_address",
+				"type": "address"
+			},
+			{
+				"name": "_date",
+				"type": "bytes16"
+			},
+			{
+				"name": "_dtime",
+				"type": "bytes16"
+			},
+			{
+				"name": "_atime",
+				"type": "bytes16"
+			},
+			{
+				"name": "_No",
+				"type": "bytes16"
+			},
+			{
+				"name": "_policy_choice",
+				"type": "bytes32"
+			}
+		],
+		"name": "setClientContract",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "clientInfosAccts",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "countClientContract",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "_address",
+				"type": "address"
+			}
+		],
+		"name": "getClientContract",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bytes16"
+			},
+			{
+				"name": "",
+				"type": "bytes16"
+			},
+			{
+				"name": "",
+				"type": "bytes16"
+			},
+			{
+				"name": "",
+				"type": "bytes16"
+			},
+			{
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getClientContracts",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	}
+]);
+        var OpenTX = OpenTXContract.at('0x8963d51674c2c213c0223eba4c110ee09baf0096');
         console.log(OpenTX);
         
         var clientContractInfoEvent = OpenTX.clientContractInfo({}, 'latest');
