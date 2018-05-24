@@ -468,7 +468,7 @@ app.post('/api/getcert', function(req,res){
     status: "NA"
   }
   contract2DB(data2DB)
-
+  //console.log(req.body.selectedPolicy)
   var policyStartDate = new Date()
   //console.log(req.body);
   var certHTML_pdf = html_pdf;
