@@ -24,8 +24,10 @@ const delayThreshold = 120 // in minute
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'wongrecrop@gmail.com',
-      pass: '4phdfrommu'
+      //user: 'wongrecrop@gmail.com',
+      //pass: '4phdfrommu'
+      user: 'digitalre.crop@gmail.com',
+      pass: '4phdfromMU'
     }
   });
 
@@ -467,15 +469,18 @@ app.post('/api/getcert', function(req,res){
   }
   contract2DB(data2DB)
 
+  var policyStartDate = new Date()
   //console.log(req.body);
   var certHTML_pdf = html_pdf;
   var certHTML_table = html_table;
   var find = ['replaceName', 'replaceLName', 'replaceEmail', 'replaceTxHash', 'replaceCarrier', 'replaceFlightNum', 
   'replaceFromAriport', 'replaceDMonth', 'replaceDDay', 'replaceDYear', 'replaceDTime',
- 'replaceToAirport', 'replaceAMonth', 'replaceADay', 'replaceAYear', 'replaceATime'];
+ 'replaceToAirport', 'replaceAMonth', 'replaceADay', 'replaceAYear', 'replaceATime','replacePolicyStartDate',
+ 'replacePremiumAmount', 'replaceCompensation'];
   var replace = [req.body.fname, req.body.lname, req.body.email, req.body.txHash, req.body.selectedFlight.split('-')[0], req.body.selectedFlight.split('-')[1],
  req.body.f_airport, req.body.d_date.split('-')[1], req.body.d_date.split('-')[2], req.body.d_date.split('-')[0], req.body.d_time,
- req.body.t_airport, req.body.a_date.split('-')[1], req.body.a_date.split('-')[2], req.body.a_date.split('-')[0], req.body.a_time];
+ req.body.t_airport, req.body.a_date.split('-')[1], req.body.a_date.split('-')[2], req.body.a_date.split('-')[0], req.body.a_time,policyStartDate.toUTCString(),
+ req.body.selectedPolicy.split(':')[0], req.body.selectedPolicy.split(':')[1]];
   certHTML_pdf=replaceOnce(certHTML_pdf, find, replace, 'g');
   certHTML_table=replaceOnce(certHTML_table, find, replace, 'g');
 
