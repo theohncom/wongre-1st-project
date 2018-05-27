@@ -93,7 +93,7 @@ app.post('/api/searchflight', function(req,res){
   var queryStr = "https://api.flightstats.com/flex/schedules/rest/v1/json/from/";
   queryStr += req.body.fromAirport+'/to/'+req.body.toAirport+'/';
   queryStr += 'arriving/'+req.body.d_year+'/'+req.body.d_month+'/'+req.body.d_day+'?';
-  queryStr += 'appId=3872726a&appKey=e6ecd704d1070c827f0466414de3a049';
+  queryStr += 'appId=3cb4ef87&appKey=9edf6d10eb2a6d8fca078b3971dc3dc7';
   
   var flights ='';
   //console.log(req.body);
@@ -156,12 +156,8 @@ app.post('/api/searchflight', function(req,res){
       }
     }
     flights +='}';
-  });
-  
-  setTimeout(function() {
     res.end( flights);
-}, 3000);
-  
+  });
 })
 
 
@@ -372,7 +368,7 @@ function callApiFlightStatus(queryObj){
       var queryStr = 'https://api.flightstats.com/flex/flightstatus/rest/v2/json/flight/status/';
       queryStr += queryObj[i].carrierFsCode+'/'+queryObj[i].flightNumber+'/arr/';
       queryStr += queryObj[i].a_year+'/'+queryObj[i].a_month+'/'+queryObj[i].a_date+'?';
-      queryStr += 'appId=3872726a&appKey=e6ecd704d1070c827f0466414de3a049&utc=false';
+      queryStr += 'appId=3cb4ef87&appKey=9edf6d10eb2a6d8fca078b3971dc3dc7&utc=false';
       //console.log(queryStr)
       //console.log(i)
       try{ 
@@ -415,7 +411,7 @@ app.post('/api/flightStatus',function(req,res){
   var queryStr = 'https://api.flightstats.com/flex/flightstatus/rest/v2/json/flight/status/';
   queryStr += req.body.carrierFsCode+'/'+req.body.flightNumber+'/arr/';
   queryStr += req.body.d_year+'/'+req.body.d_month+'/'+req.body.d_day+'?';
-  queryStr += 'appId=3872726a&appKey=e6ecd704d1070c827f0466414de3a049&utc=false';
+  queryStr += 'appId=3cb4ef87&appKey=9edf6d10eb2a6d8fca078b3971dc3dc7&utc=false';
   //console.log(queryStr);
   //myStr="https://api.flightstats.com/flex/flightstatus/rest/v2/json/flight/status/NH/808/arr/2018/5/12?appId=3872726a&appKey=e6ecd704d1070c827f0466414de3a049&utc=false";
   var output='';
