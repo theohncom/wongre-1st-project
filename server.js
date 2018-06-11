@@ -279,7 +279,7 @@ app.post('/api/closeAndCompensation',async function(req,res){
         });
       }
 
-    console.log(resApiFlightStatus)
+    //console.log(resApiFlightStatus)
     
     // 4. update db
     updateDBSet(resApiFlightStatus)
@@ -287,7 +287,7 @@ app.post('/api/closeAndCompensation',async function(req,res){
   }
   // return with a number of updated items 
   //res.send(resApiFlightStatus.length)
-  res.send(String(resApiFlightStatus.length));
+  res.send(String(Object.keys(resApiFlightStatus).length));
 })
 
 function findTimeDiff(obj){
