@@ -1,6 +1,12 @@
 /* Hide all steps by default: */
+
 .tab {
   display: none;
+}
+
+.anyClass {
+  height:300px;
+  overflow-y: scroll;
 }
 
 .step.active {

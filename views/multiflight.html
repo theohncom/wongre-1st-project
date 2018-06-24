@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+    <head>
+        <title>DigitalRe</title>
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:400,800">
+        <link rel='stylesheet' href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/css/bootstrap.css">
+        <link rel="stylesheet" href="/css/styles.css">
+
+        <script src="/web3/web3.min.js"></script>
+    </head>
+
+    <body>
+            <div class="container">
+                    <nav class="navbar navbar-expand-lg navbar-dark bg-primary pt-0 pb-0">
+                        <a class="navbar-brand" href="#">DigitalRe</a>
+                        
+                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+                                <span class="navbar-toggler-icon"></span>
+                        </button>
+                        
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                            <ul class="navbar-nav ml-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#">Home</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#">About</a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" data-toggle="dropdown">
+                                            Products
+                                        </a>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#">Product 1</a>
+                                            <a class="dropdown-item" href="#">Product 2</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="#">Another Product</a>
+                                        </div>
+                                    </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#">Contact</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
+                    <div class="jumbotron pt-3 mb-3 jumbotronHeaderImg">
+                            <h1 class="display-5 mb-3">Flight Delay Insurance</h1>
+                            <small>When your flight is delayed. We pay without claimming. </small><br>
+                           <small>Smart flight insurance powered by blockchain technology.</small>
+                           
+                    </div>
+                    <div class="jumbotron pt-3" id="jumbotronForm">
+                        <form>
+                            <div class="tab">
+                                <h2 class="display-5">Customer and Flight Information</h1>
+                                    <div class="form-row">
+                                        <div class="form-group col-sm">
+                                            <label for="inputName">First Name</label>
+                                            <input type="text" class="form-control" id="inputName" placeholder="First name" required>
+                                        </div>
+                                        <div class="form-group col-sm">
+                                            <label for="inputLastName">Last name</label>
+                                            <input type="text" class="form-control" id="inputLastName" placeholder="Last name" required>
+                                        </div>
+                                        <div class="form-group col-sm">
+                                            <label for="inputEmail">Email</label>
+                                            <input type="email" class="form-control" id="inputEmail" placeholder="Email" data-error="That email address is invalid" required>
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-sm-5">
+                                                <table class="table table-striped" id="flightTable">
+                                                        <thead>
+                                                          <tr>
+                                                            <th>Departure</th>
+                                                            <th>From</th>
+                                                            <th>To</th>
+                                                            <th>#Flight</th>
+                                                            <th>Remove</th>
+                                                          </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                          
+                                                        </tbody>
+                                                      </table>
+                                                
+                                               
+                                        </div>
+                                        <div class="form-group col-sm-7 border">
+                                           <h5> Search your flights</h5>
+                                           <div class="form-row">
+                                                <div class="form-group col-sm-4">
+                                                        <label for="d_date">Date of Departure</label>
+                                                        <input type="date" id="d_date" required>
+                                                    </div>
+                                                    <div class="form-group col-sm-2">
+                                                            <label for="inputFromAirport">From</label>
+                                                            <select id="inputFromAirport" class="form-control" required>
+                                                                <option disabled selected hidden value="">Choose...</option>
+                                                            </select>                                                       
+                                                    </div>
+                                                    <div class="form-group col-sm-2">
+                                                            <label for="inputToAirport">To</label>
+                                                            <select id="inputToAirport" class="form-control" required>
+                                                                <option disabled selected hidden value="">Choose...</option>
+                                                            </select>                                                
+                                                    </div>
+                                                    <div class="form-group col-sm-2">
+                                                            <label for="searchFlight">Search</label>
+                                                            <button type="button" class="btn btn-primary" id="searchFlight" onclick="searchflights()">Search</button>           
+                                                    </div>
+                                                    <div class="form-group col-sm-1">
+                                                            <label for="addFlight">Add</label>
+                                                            <button type="button" class="btn btn-success" id="addFlight" onclick="addFlights()">Add</button>           
+                                                    </div>
+                                           </div>
+                                           <div class="form-row anyClass">
+                                                <img id="loader" src="https://loading.io/spinners/double-ring/lg.double-ring-spinner.gif" style="display: none">
+                                                <div class="form-group" id="blockFlights"></div> 
+                                            </div>
+                                        </div>
+                                      
+                                    </div>
+                                </div>
+                            <!-- show policys -->
+                            <div class="tab">
+                                <h2 class="display-5 mb-3">Select your policy</h1>
+                                    <fieldset class="form-group">
+                                        <div class="row">
+                                            <legend class="col-form-label col-sm-2 pt-0">Policy</legend>
+                                            <div class="col-sm-10">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="policyRadios" id="policyRadios1" value="100:1000" checked required>
+                                                    <label class="form-check-label" for="policyRadios1">
+                                                        Delay in 120+ minutes: Pay 100 Bath Recieve 1000 Bath.
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="policyRadios" id="policyRadios2" value="200:2000">
+                                                    <label class="form-check-label" for="policyRadios2">
+                                                        Delay in 120+ minutes: Pay 200 Bath Recieve 2000 Bath.
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="policyRadios" id="policyRadios3" value="300:5000">
+                                                    <label class="form-check-label" for="policyRadios3">
+                                                        Delay in 120+ minutes: Pay 300 Bath Recieve 5000 Bath.
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="policyRadios" id="policyRadios4" value="500:10000">
+                                                    <label class="form-check-label" for="policyRadios4">
+                                                        Delay in 120+ minutes: Pay 500 Bath Recieve 10,000 Bath.
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div> 
+                                </fieldset>
+                                <hr>
+                                <h6>This is a demo version. Don't fill the form with real cradit card information!</h6>
+                                <fieldset class="form-group">
+                                        <div class="row">
+                                            <legend class="col-form-label col-sm-2 pt-0">Payment</legend>
+                                            <div class="col-sm-10">
+                                                    <div class="form-row">
+                                                        <div class="form-group col-sm">
+                                                            <!-- Name -->
+                                                            <label for="cardName">Card Holder's Name</label>
+                                                            <input type="text" id="cardName" name="cardName" placeholder="Card Holder's Name" class="form-control" required>
+                                                        </div>
+                                                        <div class="form-group col-sm">
+                                                            <!-- Card Number -->
+                                                            <label class="control-label" for="cardNum">Card Number</label>
+                                                            <input type="text" id="cardNum" name="cardNum" placeholder="Card Number" class="form-control" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-row">
+                                                            <div class="form-group col-sm-3">
+                                                                <!-- Expiry date-->
+                                                                <label class="control-label" for="expiry_month">Card Expiry Date</label>
+                                                                <select class="form-control" name="expiry_month" id="expiry_month" required>
+                                                                    <option disabled selected hidden value="">Choose..</option>
+                                                                    <option value="01">Jan (01)</option>
+                                                                    <option value="02">Feb (02)</option>
+                                                                    <option value="03">Mar (03)</option>
+                                                                    <option value="04">Apr (04)</option>
+                                                                    <option value="05">May (05)</option>
+                                                                    <option value="06">June (06)</option>
+                                                                    <option value="07">July (07)</option>
+                                                                    <option value="08">Aug (08)</option>
+                                                                    <option value="09">Sep (09)</option>
+                                                                    <option value="10">Oct (10)</option>
+                                                                    <option value="11">Nov (11)</option>
+                                                                    <option value="12">Dec (12)</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group col-sm-2">
+                                                                <!-- Expiry year-->
+                                                                <label class="control-label" for="expiry_month">Card Expiry year</label>
+                                                                <select class="form-control" name="expiry_year" required>
+                                                                    <option disabled selected hidden value="">Choose..</option>    
+                                                                    <option value="18">2018</option>
+                                                                    <option value="19">2019</option>
+                                                                    <option value="20">2020</option>
+                                                                    <option value="21">2021</option>
+                                                                    <option value="22">2022</option>
+                                                                    <option value="23">2023</option>
+                                                                    <option value="24">2024</option>
+                                                                    <option value="25">2025</option>
+                                                                    <option value="26">2026</option>
+                                                                    <option value="27">2027</option>
+                                                                    <option value="28">2028</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group col-sm-3">
+                                                                <!-- CVV-->
+                                                                <label class="control-label"  for="cardCVV">Card CVV</label>
+                                                                <input type="password" id="cardCVV" name="cardCVV" placeholder="CVV" class="form-control" required>
+                                                            </div>
+                                                    </div>
+                                            </div>
+                                        </div>
+                                </fieldset>   
+                                
+                            </div>  
+                            <div style="overflow:auto;">
+                            <div style="float:left;">
+                            <button type="button" class="btn btn-primary" id="prevBtn" onclick="nextPrev(-1)">Previous</button>
+                            <button type="button" class="btn btn-primary" id="nextBtn" onclick="nextPrev(1)">Next</button>
+                            </div>
+                            </div>
+                            <!-- Circles which indicates the steps of the form: -->
+                            <div style="text-align:center;margin-top:40px;">
+                                <span class="step"></span>
+                                <span class="step"></span>
+                            </div>
+                        </form> 
+                          
+                    </div>
+                    <!--/. jumbotronform-->
+                <div class="jumbotron" id="jumbotronResult" style="display: none">
+                    <div id="certResult"></div>   
+                    <img id="loaderResult" src="https://loading.io/spinners/double-ring/lg.double-ring-spinner.gif">
+
+                </div>
+
+            <!--Footer-->
+            <footer class="page-footer font-small blue pt-4 mt-4">
+
+                <!--Footer Links-->
+                <div class="container-fluid text-center text-md-left">
+                    <div class="row">
+            
+                        <!--First column-->
+                        <div class="col-md-12">
+                            <h5 class="text-uppercase">Footer Content</h5>
+                            <p>Here you can use rows and columns here to organize your footer content.</p>
+                        </div>
+                        <!--/.First column-->
+                </div>
+                <!--/.Footer Links-->
+            
+                
+            
+            </footer>
+            <!--/.Footer-->
+            <!--Copyright-->
+            <div class="footer-copyright py-2 text-center">
+                    © 2018 Copyright:
+                    <a href="#"> DigitalRe.com </a>
+            </div>
+            <!--/.Copyright-->
+                          
+
+        </div>
+        <!-- /. container-->    
+        <script src="/js/jquery.min.js"></script>
+        <script src="/js/popper.min.js"></script>
+        <script src="/js/bootstrap.min.js"></script>
+        <script src="/js/allairport.js"></script>
+        <script>
+            var countRow=0;
+            var airportfromselect = $("#inputFromAirport")
+            var airporttoselect = $("#inputToAirport")
+            //console.log(objAllAirports);
+            for (var index in objAllAirports.airports) {
+                //console.log(index);
+                var optionFrom = document.createElement('option');
+                var optionTo = document.createElement('option');
+                optionFrom.innerHTML = objAllAirports.airports[index].label;
+                optionFrom.value = objAllAirports.airports[index].value;
+                optionTo.innerHTML = objAllAirports.airports[index].label;
+                optionTo.value = objAllAirports.airports[index].value;
+                airportfromselect.append(optionFrom);
+                airporttoselect.append(optionTo);
+            }
+            var currentTab = 0; // Current tab is set to be the first tab (0)
+            var haveFlight = true;
+            showTab(currentTab); // Display the crurrent tab
+
+            function showTab(n) {
+                if (n == 1){
+                    //$('#blockFlights').empty();
+                    //$('#loader').show();
+                    //alert("call search");
+                    //searchflights();
+                }
+                // This function will display the specified tab of the form...
+                var x = document.getElementsByClassName("tab");
+                x[n].style.display = "block";
+                //... and fix the Previous/Next buttons:
+                if (n == 0) {
+                    document.getElementById("prevBtn").style.display = "none";
+                    if(!haveFlight)
+                        document.getElementById("nextBtn").style.display = "inline";
+                } else {
+                    
+                    document.getElementById("prevBtn").style.display = "inline";
+                }
+                if (n == (x.length - 1)) {
+                    document.getElementById("nextBtn").innerHTML = "Submit";
+                } else {
+                    document.getElementById("nextBtn").innerHTML = "Next";
+                }              
+                //... and run a function that will display the correct step indicator:
+                fixStepIndicator(n)
+            }
+
+            function nextPrev(n) {
+               
+                // This function will figure out which tab to display
+                var x = document.getElementsByClassName("tab");
+                // Exit the function if any field in the current tab is invalid:
+                if (n <= 1 && !validateForm() && haveFlight)  return false;
+                // Hide the current tab:
+                x[currentTab].style.display = "none";
+                // Increase or decrease the current tab by 1:
+                currentTab = currentTab + n;
+                // if you have reached the end of the form...
+                if (currentTab >= x.length) {
+                    // ... the form gets submitted:
+                    //submitForm();
+                    beforeSubmitForm();
+                    //document.getElementById("regForm").submit();
+                    return false;
+                }
+                // Otherwise, display the correct tab:
+                showTab(currentTab);
+                }
+
+                function validateForm() {
+                    //alert(currentTab);
+                // This function deals with validation of the form fields
+                var x, y, i, valid = true, radioCheck=false;
+                x = document.getElementsByClassName("tab");
+                y = x[currentTab].getElementsByTagName("input");
+                // A loop that checks every input field in the current tab:
+                for (i = 0; i < y.length; i++) {
+                    // If a field is empty...
+                    if (y[i].value == "") {
+                    // add an "invalid" class to the field:
+                    y[i].className += " invalid";
+                    // and set the current valid status to false
+                    valid = false;
+                    
+                    }
+                    if ((y[i].type == "email")&&(y[i].value != "")){
+                        //alert((y[i].value));
+                        if(!ValidateEmail(y[i].value)){
+                            //alert((y[i].value));
+                            y[i].className += " invalid";
+                            // and set the current valid status to false
+                            valid = false;
+                        }
+                    }
+                    if (y[i].type == "radio"){
+                        radioCheck=radioCheck||y[i].checked;
+                    }
+                }
+                if ((!radioCheck) && (currentTab==1)){
+                    valid=false;
+                }
+                // If the valid status is true, mark the step as finished and valid:
+                if (valid) {
+                    document.getElementsByClassName("step")[currentTab].className += " finish";
+                }
+                else{
+                    x[currentTab].className +=' was-validated';
+                }
+                return valid; // return the valid status
+                }
+
+                function fixStepIndicator(n) {
+                // This function removes the "active" class of all steps...
+                var i, x = document.getElementsByClassName("step");
+                for (i = 0; i < x.length; i++) {
+                    x[i].className = x[i].className.replace(" active", "");
+                }
+                //... and adds the "active" class on the current step:
+                x[n].className += " active";
+                }
+
+
+                function searchflights(){
+                    $('#blockFlights').empty();
+                    $("#loader").show();
+                    //$("#d_date").val();
+                    var strPost = 'fromAirport='+$("#inputFromAirport").val();
+                    strPost += '&toAirport='+$("#inputToAirport").val();
+                    strPost += '&d_year='+$("#d_date").val().split('-')[0];
+                    strPost += '&d_month='+$("#d_date").val().split('-')[1];
+                    strPost += '&d_day='+$("#d_date").val().split('-')[2];
+                    //console.log(strPost);
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.onreadystatechange = function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            $("#loader").hide();
+                            res_flights = JSON.parse(this.responseText)
+                            list_flights(res_flights);
+                            //document.getElementById("demo").innerHTML = this.responseText;
+                        }
+                    };
+                    xhttp.open("POST", "api/searchflight", true);
+                    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    //xhttp.send("fname=Henry&lname=Ford");
+                    xhttp.send(strPost);
+                }
+
+                function list_flights(json_flights){
+                    //alert(Object.keys(json_flights).length);
+                    var text ='';
+                    if(Object.keys(json_flights).length==0){
+                    //alert("No available flights.");
+                        text+="<p>No available flights.</p>";
+                        haveFlight = false;
+                    }
+                    else{
+                        haveFlight = true;
+                        for(x in json_flights){
+                            //console.log(json_flights[x]);
+                            //console.log(x);
+                            // start one flight list
+                                text +='<fieldset class="form-group">';
+                                text +='<div class="row">';
+                                text +='<legend class="col-form-label col-sm-12 pt-0">';
+                                text += 'Departure: '+json_flights[x]["d_time"]+' '+json_flights[x]["d_date"]+' Arrival: '+json_flights[x]["a_time"]+' '+json_flights[x]["a_date"];
+                                text +='</legend></div>';
+                                text +='<div class="row"><div class="form-group col-sm-1"></div>';
+                                text +='<div class="form-group col-sm"><div class="form-check form-check-inline">';
+                                //loop insert all flights
+                                for(i in json_flights[x]["flight_list"]){
+                                    //console.log(i);
+                                    text +='<label class="form-check-label p-1">';
+                                    text +='<input class="form-check-input" type="radio" name="flightRadio" id="flightRadio'+x+i+'" value="';
+                                    text += json_flights[x]['flight_list'][i]+'_'+json_flights[x]["d_time"]+'_'+json_flights[x]["a_time"]+'_'+json_flights[x]["a_date"];
+                                    //if (x=="Flight")
+                                    text += '">'+json_flights[x]['flight_list'][i].split('-')[0]+json_flights[x]['flight_list'][i].split('-')[1]+' </label>';
+                                }
+                                //end loop insert all flights
+                                text +='</div></div></div></fieldset>';
+                                //end one flight list                       
+                        }
+                    }                
+                   //$("#blockFlights").append();
+                   //console.log(text);
+                   document.getElementById("blockFlights").innerHTML = text;
+                   if(haveFlight){
+                    document.getElementById("flightRadioflight00").required = true;
+                   }else{
+                    document.getElementById("nextBtn").style.display = "none";
+                   }
+                   
+                }
+            
+            
+            
+
+            function submitForm(result){
+                //$("#jumbotronForm").hide();
+                //$("#jumbotronResult").show();
+                var fname =$('#inputName').val();
+                var lname = $('#inputLastName').val();
+                var email = $('#inputEmail').val();
+                
+                var allFlights={};
+                var count=0;
+                $("input[type=hidden]").each(function() {
+                    allFlights['flight'+count]=JSON.parse(decodeURIComponent($(this).val()));
+                    count+=1;
+                });
+                console.log(allFlights)
+                var strAllFlights = encodeURIComponent(JSON.stringify(allFlights));
+                /*var d_date = $('#d_date').val();
+                var f_airport = $('#inputFromAirport').val();
+                var t_airport = $('#inputToAirport').val();
+                var tempFlight = $('input[name="flightRadio"]:checked').val();
+                var selectedFlight = tempFlight.split("_")[0];
+                var d_time = tempFlight.split("_")[1];
+                var a_time = tempFlight.split("_")[2];
+                var a_date = tempFlight.split("_")[3];
+                */
+                var selectedPolicy=$('input[name="policyRadios"]:checked').val();
+                var strPost = '';
+                strPost = "fname="+fname+"&lname="+lname+"&email="+email;
+                strPost += "&allflights="+strAllFlights+"&selectedPolicy="+selectedPolicy;
+                strPost += "&txHash="+result.transactionHash;
+                console.log(strPost);
+                
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        $("#loaderResult").hide();
+                        //cert_result = JSON.parse(this.responseText);
+                        $('#certResult').html(this.responseText);
+                        //document.getElementById("certResult").innerHTML = this.responseText;
+                    }
+                };
+                xhttp.open("POST", "api/getcertmultiflight", true);
+                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                xhttp.send(strPost);
+                
+            }
+            // Function that validates email address through a regular expression.
+            function ValidateEmail(mail){
+                if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail))
+                {
+                    return true;
+                }
+                //alert("You have entered an invalid email address!")
+                return false;
+            }
+
+            // blockchain zone
+            if (typeof web3 !== 'undefined') {
+                web3 = new Web3(web3.currentProvider);
+            } else {
+            // set the provider you want from Web3.providers
+                web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+            }
+            web3.eth.defaultAccount = web3.eth.accounts[0];
+            var OpenTXContract = web3.eth.contract([
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "f_date",
+				"type": "bytes16"
+			},
+			{
+				"indexed": false,
+				"name": "f_dtime",
+				"type": "bytes16"
+			},
+			{
+				"indexed": false,
+				"name": "f_atime",
+				"type": "bytes16"
+			},
+			{
+				"indexed": false,
+				"name": "f_No",
+				"type": "bytes16"
+			},
+			{
+				"indexed": false,
+				"name": "policy_choice",
+				"type": "bytes32"
+			}
+		],
+		"name": "clientContractInfo",
+		"type": "event"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_address",
+				"type": "address"
+			},
+			{
+				"name": "_date",
+				"type": "bytes16"
+			},
+			{
+				"name": "_dtime",
+				"type": "bytes16"
+			},
+			{
+				"name": "_atime",
+				"type": "bytes16"
+			},
+			{
+				"name": "_No",
+				"type": "bytes16"
+			},
+			{
+				"name": "_policy_choice",
+				"type": "bytes32"
+			}
+		],
+		"name": "setClientContract",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "clientInfosAccts",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "countClientContract",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "_address",
+				"type": "address"
+			}
+		],
+		"name": "getClientContract",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bytes16"
+			},
+			{
+				"name": "",
+				"type": "bytes16"
+			},
+			{
+				"name": "",
+				"type": "bytes16"
+			},
+			{
+				"name": "",
+				"type": "bytes16"
+			},
+			{
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getClientContracts",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	}
+]);
+        var OpenTX = OpenTXContract.at('0x8963d51674c2c213c0223eba4c110ee09baf0096');
+        console.log(OpenTX);
+        
+        var clientContractInfoEvent = OpenTX.clientContractInfo({}, 'latest');
+
+        clientContractInfoEvent.watch(function(error, result) {
+            if (result) {
+                console.log(result);
+                submitForm(result);
+
+            }
+                
+        })
+
+        function beforeSubmitForm(){
+            //call smartcontract
+            $("#jumbotronForm").hide();
+            $("#jumbotronResult").show();
+            
+            var allFlights={};
+            var count=0;
+            $("input[type=hidden]").each(function() {
+                    allFlights['flight'+count]=JSON.parse(decodeURIComponent($(this).val()));
+                    count+=1;
+                });
+               
+            var d_date = allFlights.flight0.d_date; 
+            var selectedFlight = allFlights.flight0.selectedFlight;
+            var d_time = allFlights.flight0.d_time;
+            var a_time = allFlights.flight0.a_time;
+            var selectedPolicy=$('input[name="policyRadios"]:checked').val();
+            OpenTX.setClientContract(web3.eth.defaultAccount, d_date, d_time, a_time, selectedFlight, selectedPolicy, (err, res) => {
+               if (err) {
+				console.log(err);
+               }
+           });
+           
+           
+        }
+        
+        function addFlights(){
+            countRow+=1;
+            var rowID="row"+countRow;
+            var d_date = $('#d_date').val();
+            var f_airport = $('#inputFromAirport').val();
+            var t_airport = $('#inputToAirport').val();
+            var tempFlight = $('input[name="flightRadio"]:checked').val();
+            var selectedFlight = tempFlight.split("_")[0];
+            var d_time = tempFlight.split("_")[1];
+            var a_time = tempFlight.split("_")[2];
+            var a_date = tempFlight.split("_")[3];
+            var flightNum=tempFlight.split("_")[0];
+            var flightObj={"selectedFlight": selectedFlight,
+                            "f_airport": f_airport,
+                            "t_airport": t_airport,
+                            "d_date": d_date,
+                            "d_time": d_time,
+                            "a_date": a_date,
+                            "a_time": a_time};
+            var hiddenValue=encodeURIComponent(JSON.stringify(flightObj));
+            var markup = "<tr><td>"+d_date+"</td>";
+            markup += "<td>"+f_airport+"</td>";
+            markup += "<td>"+t_airport+"</td>";
+            markup += "<td>"+flightNum+"</td>";
+            markup +='<td><button id="'+rowID+'" type="button" class="btn btn-danger btn-sm" onclick="del_row( )">Remove</button>';
+            markup +='<input type="hidden" id="rowItem'+countRow+'" value="'+hiddenValue+'"></td></tr>';
+            $("#flightTable tbody").append(markup);
+            $('#blockFlights').empty();
+        }
+
+        function del_row(){
+            $('#'+event.srcElement.id).parents('tr').remove();
+        } 
+        
+        </script>
+    </body>
+</html>

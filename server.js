@@ -12,14 +12,15 @@ app.use(bodyParser.json()); // support json encoded bodies
 //var resclient = new Client();
 var fs = require('fs');
 var pdf = require('html-pdf');
-var html_table = fs.readFileSync('./views/certificate_table.html', 'utf8');
-var html_pdf = fs.readFileSync('./views/certificate.html', 'utf8');
+var html_table = fs.readFileSync('./views/certificateMulti_table.html', 'utf8');
+var html_pdf = fs.readFileSync('./views/certificateMulti.html', 'utf8');
 //var html = fs.readFileSync('./views/certificate.html', 'utf8');
 var options = { format: 'Letter' };
 
 var pathView =  __dirname+'/views/';
 
 const delayThreshold = 120 // in minute
+const flightAPIID = 'appId=cb8ca3ce&appKey=b144a7bd1f1902c2835dffd94f688c50';
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -76,7 +77,9 @@ app.get('/flightstatus',function(req,res){
   res.sendFile(pathView + "flightStatus.html");
 })
 
-
+app.get('/multiflight',function(req,res){
+  res.sendFile(pathView + "multiflight.html");
+})
 
 
 // api
@@ -93,7 +96,7 @@ app.post('/api/searchflight', function(req,res){
   var queryStr = "https://api.flightstats.com/flex/schedules/rest/v1/json/from/";
   queryStr += req.body.fromAirport+'/to/'+req.body.toAirport+'/';
   queryStr += 'arriving/'+req.body.d_year+'/'+req.body.d_month+'/'+req.body.d_day+'?';
-  queryStr += 'appId=3cb4ef87&appKey=9edf6d10eb2a6d8fca078b3971dc3dc7';
+  queryStr += flightAPIID;
   
   var flights ='';
   //console.log(req.body);
@@ -368,7 +371,7 @@ function callApiFlightStatus(queryObj){
       var queryStr = 'https://api.flightstats.com/flex/flightstatus/rest/v2/json/flight/status/';
       queryStr += queryObj[i].carrierFsCode+'/'+queryObj[i].flightNumber+'/arr/';
       queryStr += queryObj[i].a_year+'/'+queryObj[i].a_month+'/'+queryObj[i].a_date+'?';
-      queryStr += 'appId=3cb4ef87&appKey=9edf6d10eb2a6d8fca078b3971dc3dc7&utc=false';
+      queryStr += flightAPIID+'&utc=false';
       //console.log(queryStr)
       //console.log(i)
       try{ 
@@ -411,7 +414,7 @@ app.post('/api/flightStatus',function(req,res){
   var queryStr = 'https://api.flightstats.com/flex/flightstatus/rest/v2/json/flight/status/';
   queryStr += req.body.carrierFsCode+'/'+req.body.flightNumber+'/arr/';
   queryStr += req.body.d_year+'/'+req.body.d_month+'/'+req.body.d_day+'?';
-  queryStr += 'appId=3cb4ef87&appKey=9edf6d10eb2a6d8fca078b3971dc3dc7&utc=false';
+  queryStr += flightAPIID+'&utc=false';
   //console.log(queryStr);
   //myStr="https://api.flightstats.com/flex/flightstatus/rest/v2/json/flight/status/NH/808/arr/2018/5/12?appId=3872726a&appKey=e6ecd704d1070c827f0466414de3a049&utc=false";
   var output='';
@@ -441,6 +444,69 @@ function contract2DB(myobj){
     });
   });
 }
+
+app.post('/api/getcertmultiflight',function(req,res){
+  // multiple flight selection
+  // the selected flights are packed in to string of jason
+  var allFlights = JSON.parse(decodeURIComponent(req.body.allflights));
+  var strAllFlights="";
+  for (i in allFlights){
+    var data2DB={
+      fname: req.body.fname,
+      lname: req.body.lname,
+      email: req.body.email,
+      txHash: req.body.txHash,
+      selectedFlight: allFlights[i].selectedFlight,
+      f_airport: allFlights[i].f_airport,
+      t_airport: allFlights[i].t_airport,
+      d_date: allFlights[i].d_date,
+      d_time: allFlights[i].d_time,
+      a_date: allFlights[i].a_date,
+      a_time: allFlights[i].a_time,
+      status: "NA"
+    }
+    strAllFlights+=allFlights[i].selectedFlight+" From:"+allFlights[i].f_airport+" To:"+allFlights[i].f_airport;
+    strAllFlights+=" Dep:"+allFlights[i].d_date+","+allFlights[i].d_time+"(local time)";
+    strAllFlights+=" Arr:"+allFlights[i].a_date+","+allFlights[i].a_time+"(local time)"+"<br/>";
+    //console.log(data2DB)
+    contract2DB(data2DB)
+  }
+  var policyStartDate = new Date()
+  //console.log(req.body);
+  var certHTML_pdf = html_pdf;
+  var certHTML_table = html_table;
+  var find = ['replaceName', 'replaceLName', 'replaceEmail', 'replaceTxHash', 'replaceAllFlightsInfo','replacePolicyStartDate',
+ 'replacePremiumAmount', 'replaceCompensation'];
+  var replace = [req.body.fname, req.body.lname, req.body.email, req.body.txHash, strAllFlights,
+ policyStartDate.toUTCString(),req.body.selectedPolicy.split(':')[0], req.body.selectedPolicy.split(':')[1]];
+  certHTML_pdf=replaceOnce(certHTML_pdf, find, replace, 'g');
+  certHTML_table=replaceOnce(certHTML_table, find, replace, 'g');
+
+  //
+
+  setTimeout(function() {
+    res.end(certHTML_table);
+}, 3000);
+
+// create pdf
+var pdfFileName = 'certificate_tx'+Date.now()+'.pdf';
+var pdfFullPath = './certificatepdf/'+pdfFileName;
+ pdf.create(certHTML_pdf, options).toFile(pdfFullPath, function(err, res) {
+    if (err) return console.log(err);
+    console.log(res);
+    mailOptions.to = req.body.email;
+    mailOptions.attachments[0].filename = pdfFileName;
+    mailOptions.attachments[0].path = pdfFullPath;
+    transporter.sendMail(mailOptions, function(error, info){
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+      }
+    });
+  });
+  
+})
 
 app.post('/api/getcert', function(req,res){
   //step0. call smart contract
